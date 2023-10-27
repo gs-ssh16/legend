@@ -175,6 +175,8 @@ services:
       - MONGO_SESSION_ENABLED=${MONGO_SESSION_ENABLED}
     ports:
       - ${DEPOT_PORT}:${DEPOT_PORT}
+    volumes:
+      - ./z_generated/depot/config:/config
     networks:
       - legend
     healthcheck:

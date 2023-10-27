@@ -31,10 +31,20 @@
       ]
     }
   },
-  "mongo": {
-    "url": "${MONGODB_URI}",
-    "database": "depot"
-  },
+  "artifactRepositoryProviderConfiguration": {},
+  "artifactsRefreshPolicyConfiguration": {
+         "versionsUpdateIntervalInMillis": 3600000,
+         "includeProjectPropertiesConfiguration": {
+             "properties": []
+        }
+ },
+  "artifactsRetentionPolicyConfiguration": {},
+  "projects": {"defaultBranch": "master"},
+  "storages": [{
+    "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
+      "url": "${MONGODB_URI}",
+      "database": "depot"}
+  }],
   "openTracing": {
     "openTracingUri": "your URL here",
     "serviceName": "legend-depot-store",
@@ -96,14 +106,14 @@
   },
   "artifactRepositoryProviderConfiguration": {
 
-    "org.finos.legend.depot.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
-      "settingsLocation": "/config/settings.xml",
-      "versionsUpdateIntervalInMillis": 3600000,
-      "latestUpdateIntervalInMillis": 3600000
+    "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
+      "settingsLocation": "/config/settings.xml"
     }
   },
-  "includeProjectPropertiesConfiguration": {
-    "properties": []
+  "artifactsRetentionPolicyConfiguration": {
+    "maximumSnapshotsAllowed": 5,
+    "ttlForVersionsInDays": 365,
+    "ttlForSnapshotsInDays": 30
   },
   "queue-interval": 30
 }

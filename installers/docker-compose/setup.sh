@@ -27,3 +27,9 @@ cp -r $SRC/* $DEST
 
 sed -i 's/${DEPOT_STORE_HOST}/'$DEPOT_STORE_HOST'/g' $DEST/setup.sh
 sed -i 's/${DEPOT_STORE_PORT}/'$DEPOT_STORE_PORT'/g' $DEST/setup.sh
+
+## Depot
+SRC=$BASE/depot/config
+DEST=$GEN/depot/config
+mkdir -p $DEST
+cp -r $SRC/* $DEST

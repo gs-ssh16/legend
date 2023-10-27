@@ -143,3 +143,79 @@ Each component exposes a Swagger endpoint that can be used to explore the compon
 # Known Issues / Gotchas
 
 In some cases, navigating to the Studio/Query web page can return an "unauthorized" error. This is usually because of stale cookies. Clear browser cookies for localhost (or domain name/IP that you are using) and try again.
+
+#
+
+
+# Setup for Windows - WSL
+
+## First time setup
+
+1. Make sure Docker Desktop is installed. If not, install it from here: https://www.docker.com/products/docker-desktop/
+2. Run this command to check if current windows user is in docker-users group `net localgroup docker-users`. If not present, add the user by running this command in an elevated command prompt `net localgroup docker-users <<windows-user>> /ADD`. Post that, sign out and sign back in.
+3. Ensure Ubuntu wsl environment exists. If not, install it using the command `wsl --install -d Ubuntu`
+4. Start Docker Desktop application and keep it running in the background
+5. In wsl terminal, check if docker executable is working by running the commad `docker --version`
+6. Create Gitlab OAuth application using [above](https://github.com/gs-ssh16/legend/blob/master/installers/docker-compose/README.md#create-a-gitlabcom-account) documentation and note down client_id and secret
+7. In wsl terminal, run below commands: <br/>
+          `cd ~` <br/>
+          `git clone https://github.com/gs-ssh16/legend` <br/>
+          `cd ./legend/installers/docker-compose` <br/>
+          `sudo chown -R $(whoami):$(whoami) *`
+
+## Running legend applications
+1. Start Docker Desktop application and keep it running in the background
+2. In wsl terminal, run below commands: <br/>
+          `cd ~/legend/installers/docker-compose` <br/>
+          `export GITLAB_APP_ID=<<add your app id>>` <br/>
+          `export GITLAB_APP_SECRET=<<add your app secret>>` <br/>
+          `./docker-compose.sh --profile studio up -d`
+4. It takes few minutes to start up all servers
+5. Status can be checked using this command `./docker-compose.sh ps`
+6. Once all applications are running, you should be able to access Studio at http://localhost:9000/studio
+7. Applications can be terminated with this command `./docker-compose.sh --profile studio down`
+
+
+## Query Application
+
+### One time setup on Gitlab project
+1. Add [settings.xml](https://gitlab.com/finosfoundation/legend/showcase/legend-showcase-northwind-data/-/blob/master/settings.xml?ref_type=heads) file to the project
+2. Add [deploy_snapshot and deploy_release](https://gitlab.com/finosfoundation/legend/showcase/legend-showcase-northwind-data/-/blob/master/.gitlab-ci.yml?ref_type=heads#L49-64) jobs to .gitlab-ci.yml file of the project
+
+### One time setup on deployment side
+1. [Create](https://gitlab.com/-/profile/personal_access_tokens) a Gitlab personal access token with read_api scope
+2. Add a new repository and server in respective sections in docker-compose/depot-store/config/settings.xml file like below, with <<GITLAB_PROJECT_ID>> and <<PERSONAL_ACCESS_TOKEN>> replaced
+   ```
+   <repository>
+      <id><<GITLAB_PROJECT_ID>></id>
+      <url>https://gitlab.com/api/v4/projects/<<GITLAB_PROJECT_ID>>/-/packages/maven</url>
+      <releases>
+          <enabled>true</enabled>
+          <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+          <enabled>true</enabled>
+          <updatePolicy>always</updatePolicy>
+      </snapshots>
+   </repository>
+   ```
+   ```
+   <server>
+     <id><<GITLAB_PROJECT_ID>></id>
+     <username>Private-Token</username>
+     <password><<PERSONAL_ACCESS_TOKEN>></password>
+   </server>
+   ```
+
+### Running Query Applications
+1. There is a docker-compose profile `query` similar to `studio` profile. To start it, run below commands in a wsl terminal: <br/>
+   `cd ~/legend/installers/docker-compose` <br/>
+   `export GITLAB_APP_ID=<<add your app id>>` <br/>
+   `export GITLAB_APP_SECRET=<<add your app secret>>` <br/>
+   `export DEPOT_STORE_ADMIN_USER=<<add your gitlab user handle>>` <br/>
+   `./docker-compose.sh --profile query up -d`
+2. Once all applications are running, you should be able to access Query at http://localhost:9001/query
+3. In order to see latest updates to master (or) new versions of projects in Query, Depot server needs to be notified once the Gitlab pipeline completes. To notify, hit below endpoints <br/>
+   Notify master-SNAPSHOT -> `http://localhost:6201/depot-store/api/queue/PROD-<<GITLAB_PROJECT_ID>>/<<GROUP_ID>>/<<ARTIFACT_ID>>/master-SNAPSHOT`  <br/>
+   Notify version -> `http://localhost:6201/depot-store/api/queue/PROD-<<GITLAB_PROJECT_ID>>/<<GROUP_ID>>/<<ARTIFACT_ID>>/<<version>>`
+4. To check available versions of a project on Depot server, hit this endpoint - `http://localhost:6200/depot/api/projects/<<GROUP_ID>>/<<ARTIFACT_ID>>/versions?snapshots=true`
