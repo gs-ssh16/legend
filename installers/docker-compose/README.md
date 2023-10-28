@@ -188,7 +188,7 @@ In some cases, navigating to the Studio/Query web page can return an "unauthoriz
    ```
    <repository>
       <id><<GITLAB_PROJECT_ID>></id>
-      <url>https://gitlab.com/api/v4/projects/<<GITLAB_PROJECT_ID>>/-/packages/maven</url>
+      <url>https://gitlab.com/api/v4/projects/<<GITLAB_PROJECT_ID>>/packages/maven</url>
       <releases>
           <enabled>true</enabled>
           <updatePolicy>never</updatePolicy>
